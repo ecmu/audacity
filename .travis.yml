@@ -18,7 +18,7 @@ script:
   - time ./configure --prefix=/usr
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
-  - sed -i -e 's|^Exec=.*|Exec=audacity|g' audacity.desktop
+  - sed -i -e 's|^Exec=.*|Exec=audacity|g' appdir/usr/share/applications/audacity.desktop
   - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt*.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
