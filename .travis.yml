@@ -1,10 +1,14 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: trusty
+
 addons:
     apt:
-        sources:
-            - ubuntu-toolchain-r-test
         packages:
             - g++-4.9
             - gcc-4.9
+            
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -y libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss
@@ -14,7 +18,25 @@ before_install:
     - export CFLAGS="$CFLAGS $FLAGS"
     - export CXXFLAGS="$CXXFLAGS $FLAGS"
     - g++-4.9 --version
-language:
-    - cpp
+
 script:
-    -  time ./configure && time make -j2
+  - time ./configure --prefix=/usr
+  - time make -j$(nproc)
+  - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt*.AppImage
+  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
+  - find ./appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  - # curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh ./Audacity*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)$/
