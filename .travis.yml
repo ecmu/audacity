@@ -18,6 +18,8 @@ script:
   - time ./configure --prefix=/usr
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - cp LICENSE.txt appdir/
+  - ( cd appdir/usr/share/audacity ; wget "https://www.fosshub.com/Audacity.html/audacity-manual-2.2.0.zip" ; unzip *.zip ; rm *.zip )
   - sed -i -e 's|^Exec=.*|Exec=audacity|g' appdir/usr/share/applications/audacity.desktop
   - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt*.AppImage
