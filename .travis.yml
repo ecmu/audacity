@@ -30,7 +30,7 @@ script:
   - # Workaround to increase compatibility with older systems; see https://github.com/darealshinji/AppImageKit-checkrt for details
   - mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
   - ( cd appdir ; rm AppRun ; wget https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
-  - find fails/ -ipath '*HarfBuzz*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345295909
+  - find ./appdir/ -ipath '*HarfBuzz*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345295909
   - ./linuxdeployqt*.AppImage --appimage-extract
   - export PATH=$(readlink -f ./squashfs-root/usr/bin):$PATH
   - ./squashfs-root/usr/bin/appimagetool -g ./appdir/ Audacity-$VERSION-x86_64.AppImage
