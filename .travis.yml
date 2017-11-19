@@ -15,7 +15,7 @@ before_install:
   - g++-4.9 --version
 
 script:
-  - time ./configure --prefix=/usr
+  - time ./configure --prefix=/usr --disable-dynamic-loading
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
   - cp LICENSE.txt appdir/
