@@ -6,7 +6,7 @@ dist: trusty
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
-  - sudo apt-get install -y libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss gcc-4.9 g++-4.9 cpp-4.9
+  - sudo apt-get install -y libav-tools libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss gcc-4.9 g++-4.9 cpp-4.9
   - git show -s --format="#define REV_LONG \"%H\"%n#define REV_TIME \"%cd\"%n" | tee ./src/RevisionIdent.h
   - export CXX="g++-4.9" CC="gcc-4.9"
   - FLAGS="-w -std=gnu++11"
@@ -15,7 +15,7 @@ before_install:
   - g++-4.9 --version
 
 script:
-  - time ./configure --prefix=/usr --disable-dynamic-loading
+  - time ./configure --prefix=/usr --with-lib-preference="local system" --with-ffmpeg=system --disable-dynamic-loading
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
   - cp LICENSE.txt appdir/
