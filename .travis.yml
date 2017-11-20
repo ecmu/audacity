@@ -22,7 +22,7 @@ script:
   - # similarly, despite lv2-dev, getting:
   - # configure: error: You requested using the system libraries for LV2 but they are not available
   - # when using --with-lv2=system
-  - time ./configure --prefix=/usr --with-lib-preference="local system" --disable-dynamic-loading --with-ffmpeg=system --with-portaudio=local  # --with-expat=system --with-lame=system --with-libflac=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
+  - time ./configure --prefix=/usr --with-lib-preference="local system" --disable-dynamic-loading --with-ffmpeg=system --with-portaudio=local --with-soundtouch=system # --with-expat=system --with-lame=system --with-libflac=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
   - cp LICENSE.txt appdir/
