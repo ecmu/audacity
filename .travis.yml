@@ -4,8 +4,10 @@ sudo: require
 dist: trusty
 
 env:
+ matrix:
   - JACK=yes
   - JACK=no
+ matrix:
   - FFMPEG=yes
   - FFMPEG=no
 
