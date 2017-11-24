@@ -4,7 +4,7 @@ sudo: require
 dist: trusty
             
 before_install:
-  - patch -p0 < 0001-Fix-building-against-the-system-portaudio-library.patch
+  - patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo add-apt-repository -y ppa:jonathonf/ffmpeg-3
   - sudo apt-get update -qq
