@@ -10,7 +10,7 @@ env:
   - JACK=no FFMPEG=no
 
 before_install:
-  - [ "$JACK" == "yes" ] && patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch # To be able to use --with-portaudio=system which is needed to pull in libjack.so.1
+  - if [ "$JACK" == "yes" ] ; then patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch ; fi # To be able to use --with-portaudio=system which is needed to pull in libjack.so.1
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo add-apt-repository -y ppa:jonathonf/ffmpeg-3
   - sudo apt-get update -qq
