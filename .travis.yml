@@ -3,18 +3,19 @@ compiler: gcc
 sudo: require
 dist: trusty
 
-env:
-  - JACK=yes FFMPEG=yes
-  - JACK=no FFMPEG=yes
-  - JACK=yes FFMPEG=no
-  - JACK=no FFMPEG=no
+matrix:
+  env:
+    - JACK=yes
+    - JACK=no
+    - FFMPEG=no
+    - FFMPEG=yes
 
 before_install:
   - if [ "$JACK" == "yes" ] ; then patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch ; fi # To be able to use --with-portaudio=system which is needed to pull in libjack.so.1
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo add-apt-repository -y ppa:jonathonf/ffmpeg-3
   - sudo apt-get update -qq
-  - sudo apt-get install -y libasound2-dev libavcodec-dev libexpat1-dev libflac++-dev libid3tag0-dev libjack-dev liblilv-dev libmad0-dev libmp3lame-dev libogg-dev libportsmf-dev libsbsms-dev libsndfile1-dev libsoundtouch-dev libsoxr-dev libsuil-dev libtwolame-dev libvorbis-dev lv2-dev portaudio19-dev vamp-plugin-sdk libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libswresample-dev libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss gcc-4.9 g++-4.9 cpp-4.9
+  - sudo apt-get install -y autogen libasound2-dev libavcodec-dev libexpat1-dev libflac++-dev libid3tag0-dev libjack-dev liblilv-dev libmad0-dev libmp3lame-dev libogg-dev libportsmf-dev libsbsms-dev libsndfile1-dev libsoundtouch-dev libsoxr-dev libsuil-dev libtwolame-dev libvorbis-dev lv2-dev portaudio19-dev vamp-plugin-sdk libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libswresample-dev libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss gcc-4.9 g++-4.9 cpp-4.9
   - git show -s --format="#define REV_LONG \"%H\"%n#define REV_TIME \"%cd\"%n" | tee ./src/RevisionIdent.h
   - export CXX="g++-4.9" CC="gcc-4.9"
   - FLAGS="-w -std=gnu++11"
