@@ -560,6 +560,9 @@ void WaveTrack::ConvertToSampleFormat(sampleFormat format)
 
 bool WaveTrack::IsEmpty(double t0, double t1) const
 {
+   if (t0 > t1)
+      return true;
+
    //printf("Searching for overlap in %.6f...%.6f\n", t0, t1);
    for (const auto &clip : mClips)
    {
@@ -658,8 +661,8 @@ void WaveTrack::Trim (double t0, double t1)
    if(!inside1 && t1 < GetEndTime())
       Clear(t1,GetEndTime());
 
-   if(!inside0)
-      SplitDelete(0,t0);
+   if(!inside0 && t0 > GetStartTime())
+      SplitDelete(GetStartTime(), t0);
 }
 
 
@@ -1281,7 +1284,14 @@ void WaveTrack::Paste(double t0, const Track *src)
    bool singleClipMode = (other->GetNumClips() == 1 &&
          other->GetStartTime() == 0.0);
 
-   double insertDuration = other->GetEndTime();
+   const double insertDuration = other->GetEndTime();
+   if( insertDuration != 0 && insertDuration < 1.0/mRate )
+      // PRL:  I added this check to avoid violations of preconditions in other WaveClip and Sequence
+      // methods, but allow the value 0 so I don't subvert the purpose of commit
+      // 739422ba70ceb4be0bb1829b6feb0c5401de641e which causes append-recording always to make
+      // a new clip.
+      return;
+
    //printf("Check if we need to make room for the pasted data\n");
 
    // Make room for the pasted data
