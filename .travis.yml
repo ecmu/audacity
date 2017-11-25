@@ -42,8 +42,8 @@ script:
   - chmod a+x linuxdeployqt*.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
-  - if [ "$FFMPEG" == "yes" ] ; then export VERSION=$VERSION_withFFMPEG ; fi
-  - if [ "$JACK" == "yes" ] ; then export VERSION=$VERSION_forJACK ; fi
+  - if [ "$FFMPEG" == "yes" ] ; then sed -i -e 's|^Name=.*|& with FFMPEG|g' appdir/usr/share/applications/audacity.desktop ; fi
+  - if [ "$JACK" == "yes" ] ; then sed -i -e 's|^Name=.*|& for JACK|g' appdir/usr/share/applications/audacity.desktop ; fi
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
   - # Workaround to increase compatibility with older systems; see https://github.com/darealshinji/AppImageKit-checkrt for details
   - #### Currently disabled due to https://github.com/darealshinji/AppImageKit-checkrt/issues/3
