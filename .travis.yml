@@ -3,12 +3,11 @@ compiler: gcc
 sudo: require
 dist: trusty
 
-matrix:
-  env:
-    - JACK=yes
-    - JACK=no
-    - FFMPEG=no
-    - FFMPEG=yes
+env:
+  - JACK=yes FFMPEG=yes
+  - JACK=no FFMPEG=yes
+  - JACK=yes FFMPEG=no
+  - JACK=no FFMPEG=no
 
 before_install:
   - if [ "$JACK" == "yes" ] ; then patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch ; fi # To be able to use --with-portaudio=system which is needed to pull in libjack.so.1
