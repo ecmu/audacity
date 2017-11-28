@@ -1,0 +1,73 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: trusty
+
+env:
+  - JACK=yes FFMPEG=yes
+  - JACK=no FFMPEG=yes
+  - JACK=yes FFMPEG=no
+  - JACK=no FFMPEG=no
+
+before_install:
+  - git clone https://github.com/audacity/audacity -depth 1 --shallow-submodules
+  - cd audacity
+  - cp ../000* .
+  - if [ "$JACK" == "yes" ] ; then patch -p1 < 0001-Fix-building-against-the-system-portaudio-library.patch ; fi # To be able to use --with-portaudio=system which is needed to pull in libjack.so.1
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo add-apt-repository -y ppa:jonathonf/ffmpeg-3
+  - sudo apt-get update -qq
+  - sudo apt-get install -y autogen libasound2-dev libavcodec-dev libexpat1-dev libflac++-dev libid3tag0-dev libjack-dev liblilv-dev libmad0-dev libmp3lame-dev libogg-dev libportsmf-dev libsbsms-dev libsndfile1-dev libsoundtouch-dev libsoxr-dev libsuil-dev libtwolame-dev libvorbis-dev lv2-dev portaudio19-dev vamp-plugin-sdk libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libswresample-dev libwxgtk3.0-dev libgtk2.0-dev gettext libasound2-dev alsa-utils alsa-oss gcc-4.9 g++-4.9 cpp-4.9
+  - git show -s --format="#define REV_LONG \"%H\"%n#define REV_TIME \"%cd\"%n" | tee ./src/RevisionIdent.h
+  - export CXX="g++-4.9" CC="gcc-4.9"
+  - FLAGS="-w -std=gnu++11"
+  - export CFLAGS="$CFLAGS $FLAGS"
+  - export CXXFLAGS="$CXXFLAGS $FLAGS"
+  - g++-4.9 --version
+
+script:
+  - # Despite libsbsms-dev, getting:
+  - # configure: error: You requested using the system libraries for LIBSBSMS but they are not available
+  - # when using --with-sbsms=system
+  - # similarly, despite lv2-dev, getting:
+  - # configure: error: You requested using the system libraries for LV2 but they are not available
+  - # when using --with-lv2=system
+  - if [ "$JACK" == "yes" ] ; then PORTAUDIO="--with-portaudio=system" ; else  PORTAUDIO="--with-portaudio=local" ; fi
+  - if [ "$FFMPEG" == "yes" ] ; then FFM="--with-ffmpeg=system" ; else FFM="--with-ffmpeg=local" ; fi
+  - if [ "$JACK" == "yes" ] || [ "$FFMPEG" == "yes" ] ; then DYLD="--disable-dynamic-loading" ; fi
+  - time ./configure --prefix=/usr $DYLD --with-lib-preference="local system" $FFM $PORTAUDIO --with-soundtouch=system # --with-expat=system --with-lame=system --with-libflac=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
+  - time make -j$(nproc)
+  - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - cp LICENSE.txt appdir/
+  - URL=$(wget -nv "https://www.fosshub.com/Audacity.html/audacity-manual-2.2.0.zip" -O - | grep -oe 'https.*zip') # Get manual URL
+  - ( cd appdir/usr/share/audacity ; wget "$URL" ; unzip *.zip ; rm *.zip )
+  - sed -i -e 's|^Exec=.*|Exec=audacity|g' appdir/usr/share/applications/audacity.desktop
+  - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt*.AppImage
+  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - if [ "$FFMPEG" == "yes" ] ; then sed -i -e 's|^Name=.*|& with FFMPEG|g' appdir/usr/share/applications/audacity.desktop ; fi
+  - if [ "$JACK" == "yes" ] ; then sed -i -e 's|^Name=.*|& for JACK|g' appdir/usr/share/applications/audacity.desktop ; fi
+  - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - # Workaround to increase compatibility with older systems; see https://github.com/darealshinji/AppImageKit-checkrt for details
+  - #### Currently disabled due to https://github.com/darealshinji/AppImageKit-checkrt/issues/3
+  - #### mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
+  - #### ( cd appdir ; rm AppRun ; wget https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
+  - find ./appdir/ -ipath '*HarfBuzz*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345295909
+  - find ./appdir/ -ipath '*FreeType*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345341963
+  - if [ "$JACK" == "yes" ] ; then find ./appdir/ -ipath '*libjack*' -delete ; fi # The bundled libjack.so.1 refuses to work with the JACK on Ubuntu 17.10
+  - ./linuxdeployqt*.AppImage --appimage-extract
+  - export PATH=$(readlink -f ./squashfs-root/usr/bin):$PATH
+  - NAME=$(grep '^Name=.*' appdir/usr/share/applications/audacity.desktop | cut -d "=" -f 2 | sed -e 's|\ |_|g')
+  - ./squashfs-root/usr/bin/appimagetool -g ./appdir/ $NAME-$VERSION-x86_64.AppImage
+
+after_success:
+  - find ./appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  - # curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh ./Audacity*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)$/
