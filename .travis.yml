@@ -4,10 +4,14 @@ sudo: require
 dist: trusty
 
 env:
-  - JACK=yes FFMPEG=yes
-  - JACK=no FFMPEG=yes
-  - JACK=yes FFMPEG=no
-  - JACK=no FFMPEG=no
+  - JACK=yes FFMPEG=yes FLAC=no
+  - JACK=no FFMPEG=yes FLAC=no
+  - JACK=yes FFMPEG=no FLAC=no
+  - JACK=no FFMPEG=no FLAC=no
+  - JACK=yes FFMPEG=yes FLAC=yes
+  - JACK=no FFMPEG=yes FLAC=yes
+  - JACK=yes FFMPEG=no FLAC=yes
+  - JACK=no FFMPEG=no FLAC=yes
 
 before_install:
   - git clone https://github.com/audacity/audacity --depth 1 --shallow-submodules
@@ -34,8 +38,9 @@ script:
   - # when using --with-lv2=system
   - if [ "$JACK" == "yes" ] ; then PORTAUDIO="--with-portaudio=system" ; else  PORTAUDIO="--with-portaudio=local" ; fi
   - if [ "$FFMPEG" == "yes" ] ; then FFM="--with-ffmpeg=system" ; else FFM="--with-ffmpeg=local" ; fi
-  - if [ "$JACK" == "yes" ] || [ "$FFMPEG" == "yes" ] ; then DYLD="--disable-dynamic-loading" ; fi
-  - time ./configure --prefix=/usr $DYLD --with-lib-preference="local system" $FFM $PORTAUDIO --with-soundtouch=system # --with-expat=system --with-lame=system --with-libflac=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
+  - if [ "$FLAC" == "yes" ]  ; then FLACS="--with-libflac=system" ; fi
+  - if [ "$JACK" == "yes" ] || [ "$FFMPEG" == "yes" ] || [ "$FLAC" == "yes" ] ; then DYLD="--disable-dynamic-loading" ; fi
+  - time ./configure --prefix=/usr $DYLD --with-lib-preference="local system" $FFM $PORTAUDIO $FLACS --with-soundtouch=system # --with-expat=system --with-lame=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
   - cp LICENSE.txt appdir/
@@ -47,6 +52,7 @@ script:
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
   - if [ "$FFMPEG" == "yes" ] ; then sed -i -e 's|^Name=.*|& with FFMPEG|g' appdir/usr/share/applications/audacity.desktop ; fi
+  - if [ "$FLAC" == "yes" ] ; then sed -i -e 's|^Name=.*|& with FLAC|g' appdir/usr/share/applications/audacity.desktop ; fi
   - if [ "$JACK" == "yes" ] ; then sed -i -e 's|^Name=.*|& for JACK|g' appdir/usr/share/applications/audacity.desktop ; fi
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
   - # Workaround to increase compatibility with older systems; see https://github.com/darealshinji/AppImageKit-checkrt for details
