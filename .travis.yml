@@ -56,9 +56,9 @@ script:
   - if [ "$JACK" == "yes" ] ; then sed -i -e 's|^Name=.*|& for JACK|g' appdir/usr/share/applications/audacity.desktop ; fi
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
   - # Workaround to increase compatibility with older systems; see https://github.com/darealshinji/AppImageKit-checkrt for details
-  - #### Currently disabled due to https://github.com/darealshinji/AppImageKit-checkrt/issues/3
-  - #### mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
-  - #### ( cd appdir ; rm AppRun ; wget https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
+  - mkdir -p usr/optional/ ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/exec-x86_64.so -O usr/optional/exec.so
+  - mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
+  - ( cd appdir ; rm AppRun ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
   - find ./appdir/ -ipath '*HarfBuzz*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345295909
   - find ./appdir/ -ipath '*FreeType*' -delete # Workaround for https://github.com/AppImage/AppImages/issues/110#issuecomment-345341963
   - if [ "$JACK" == "yes" ] ; then find ./appdir/ -ipath '*libjack*' -delete ; fi # The bundled libjack.so.1 refuses to work with the JACK on Ubuntu 17.10
