@@ -44,7 +44,7 @@ script:
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
   - cp LICENSE.txt appdir/
-  - URL=$(wget -nv "https://www.fosshub.com/Audacity.html/audacity-manual-2.2.1.zip" -O - | grep -oe 'https.*zip') # Get manual URL
+  - URL=$(wget -nv "https://github.com/probonopd/audacity/releases/download/manual/audacity-manual-2.2.1.zip" -O - | grep -oe 'https.*zip') # Get manual URL
   - ( cd appdir/usr/share/audacity ; wget "$URL" ; unzip *.zip ; rm *.zip )
   - sed -i -e 's|^Exec=.*|Exec=audacity|g' appdir/usr/share/applications/audacity.desktop
   - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
