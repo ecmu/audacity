@@ -4,4 +4,6 @@ This project contains a [Travis CI](https://travis-ci.org) `.travis.yml` file th
 
 ![audacity_logo_512px_white](https://user-images.githubusercontent.com/2480569/33625018-2da426a6-d9ee-11e7-8265-b719ce869424.png)
 
+__Mininum system requirement is a mainstream desktop Linux distribution with glibc 2.18 (2104 or later).__
+
 Audacity® is free, open source, cross-platform audio software for multi-track recording and editing. For more information, see http://www.audacityteam.org/.
