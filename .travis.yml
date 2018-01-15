@@ -43,6 +43,7 @@ script:
   - time ./configure --prefix=/usr $DYLD --with-lib-preference="local system" $FFM $PORTAUDIO $FLACS --with-soundtouch=system # --with-expat=system --with-lame=system --with-libid3tag=system --with-libmad=system --with-libsndfile=system --with-libsoxr=system --with-libtwolame=system --with-libvamp=system --with-libvorbis=system --with-portsmf=system
   - time make -j$(nproc)
   - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - strip appdir/usr/bin/audacity # FIXME: "make install" should do this automatically
   - cp LICENSE.txt appdir/
   - ( cd appdir/usr/share/audacity ; wget "https://github.com/probonopd/audacity/releases/download/manual/audacity-manual-2.2.1.zip" ; unzip *.zip ; rm *.zip )
   - sed -i -e 's|^Exec=.*|Exec=audacity|g' appdir/usr/share/applications/audacity.desktop
