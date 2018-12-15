@@ -8,10 +8,10 @@ env:
   # JACK=no FFMPEG=yes FLAC=no
   # JACK=yes FFMPEG=no FLAC=no
   # JACK=no FFMPEG=no FLAC=no
-  - JACK=yes FFMPEG=yes FLAC=yes
-  - JACK=no FFMPEG=yes FLAC=yes
-  # JACK=yes FFMPEG=no FLAC=yes
-  # JACK=no FFMPEG=no FLAC=yes
+  # JACK=yes FFMPEG=yes FLAC=yes
+  # JACK=no FFMPEG=yes FLAC=yes
+  - JACK=yes FFMPEG=no FLAC=yes
+  - JACK=no FFMPEG=no FLAC=yes
 
 before_install:
   - git clone https://github.com/audacity/audacity --depth 1 --shallow-submodules
